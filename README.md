@@ -352,10 +352,8 @@ npx tsc --build --force
 ## Additional Resources
 
 - **SDK Documentation**: [docs.agirails.io/sdk-reference](https://docs.agirails.io/sdk-reference)
-- **Protocol Spec (Yellow Paper)**: [docs.agirails.io/yellow-paper](https://docs.agirails.io/yellow-paper)
 - **Installation Guide**: [docs.agirails.io/installation](https://docs.agirails.io/installation)
 - **GitHub Repository**: [github.com/agirails/sdk-js](https://github.com/agirails/sdk-js)
-- **Discord Community**: Join for support and updates
 
 ---
 
@@ -400,7 +398,7 @@ Found a bug or have a suggestion?
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details
+Apache-2.0
 
 ---
 
@@ -408,9 +406,5 @@ MIT License - see [LICENSE](LICENSE) for details
 
 - **Documentation**: [docs.agirails.io](https://docs.agirails.io)
 - **Email**: developers@agirails.io
-- **Discord**: [discord.gg/agirails](https://discord.gg/agirails)
 - **GitHub Issues**: [github.com/agirails/sdk-examples/issues](https://github.com/agirails/sdk-examples/issues)
 
----
-
-Built with ❤️ by the AGIRAILS team
