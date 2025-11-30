@@ -27,20 +27,33 @@ async function main() {
   try {
     logSection('AGIRAILS SDK - EAS Attestations Example');
 
-    if (!process.env.PRIVATE_KEY) {
-      throw new Error('PRIVATE_KEY not found in .env file');
+    const requesterKey = process.env.PRIVATE_KEY;
+    const providerKey = process.env.PROVIDER_PRIVATE_KEY;
+
+    if (!requesterKey || !providerKey) {
+      throw new Error('PRIVATE_KEY (requester) and PROVIDER_PRIVATE_KEY (provider) are required in .env');
     }
 
-    // 1. Initialize client WITH EAS configuration
-    log('🔧', 'Initializing ACTP Client with EAS support...');
+    // 1. Initialize clients WITH EAS configuration
+    log('🔧', 'Initializing ACTP Clients (requester + provider) with EAS support...');
 
-    let client;
+    let requester;
+    let provider;
     try {
-      client = await ACTPClient.create({
+      requester = await ACTPClient.create({
         network: 'base-sepolia',
-        privateKey: process.env.PRIVATE_KEY,
+        privateKey: requesterKey,
         eas: {
           contractAddress: '0x4200000000000000000000000000000000000021', // Base Sepolia EAS
+          deliveryProofSchemaId: '0x1b0ebdf0bd20c28ec9d5362571ce8715a55f46e81c3de2f9b0d8e1b95fb5ffce'
+        }
+      });
+
+      provider = await ACTPClient.create({
+        network: 'base-sepolia',
+        privateKey: providerKey,
+        eas: {
+          contractAddress: '0x4200000000000000000000000000000000000021',
           deliveryProofSchemaId: '0x1b0ebdf0bd20c28ec9d5362571ce8715a55f46e81c3de2f9b0d8e1b95fb5ffce'
         }
       });
@@ -48,13 +61,19 @@ async function main() {
       handleNetworkError(error);
     }
 
-    const myAddress = await client.getAddress();
-    log('✅', `Connected as: ${myAddress}`);
+    const requesterAddress = await requester.getAddress();
+    const providerAddress = await provider.getAddress();
+    log('✅', `Requester: ${requesterAddress}`);
+    log('✅', `Provider:  ${providerAddress}`);
 
-    const config = client.getNetworkConfig();
+    if (requesterAddress.toLowerCase() === providerAddress.toLowerCase()) {
+      throw new Error('Requester and provider must be different keys to mirror real flows.');
+    }
+
+    const config = requester.getNetworkConfig();
 
     // Verify EAS module is available BEFORE logging EAS config
-    if (!client.eas) {
+    if (!requester.eas || !provider.eas) {
       throw new Error('EAS module not initialized. Check EAS configuration.');
     }
 
@@ -63,7 +82,7 @@ async function main() {
     console.log(`Delivery Schema: ${config.eas.deliverySchemaUID}`);
 
     // 2. Check USDC balance
-    const usdcBalance = await client.escrow.getTokenBalance(config.contracts.usdc, myAddress);
+    const usdcBalance = await requester.escrow.getTokenBalance(config.contracts.usdc, requesterAddress);
     console.log(`USDC Balance: ${formatUSDC(usdcBalance)}`);
 
     if (usdcBalance < parseUnits('10', 6)) {
@@ -79,9 +98,9 @@ async function main() {
     const disputeWindow = 300;
 
     log('📝', 'Creating transaction...');
-    const txId = await client.kernel.createTransaction({
-      requester: myAddress,
-      provider: myAddress, // Self-test
+    const txId = await requester.kernel.createTransaction({
+      requester: requesterAddress,
+      provider: providerAddress,
       amount,
       deadline,
       disputeWindow
@@ -90,9 +109,9 @@ async function main() {
     log('✅', `Transaction created: ${shortTxId(txId)}`);
 
     log('💳', 'Funding transaction...');
-    await client.fundTransaction(txId);
+    await requester.fundTransaction(txId);
 
-    let tx = await client.kernel.getTransaction(txId);
+    let tx = await requester.kernel.getTransaction(txId);
     console.log(`State: ${formatState(tx.state)}`);
 
     // 4. Generate delivery proof
@@ -111,7 +130,7 @@ async function main() {
 
     log('📦', 'Generating delivery proof...');
 
-    const proof = client.proofGenerator.generateDeliveryProof({
+    const proof = provider.proofGenerator.generateDeliveryProof({
       txId,
       deliverable: JSON.stringify(deliveryResult),
       deliveryUrl: 'ipfs://QmExampleDeliverableHash', // In production, upload to IPFS first
@@ -133,9 +152,9 @@ async function main() {
     log('🔏', 'Creating on-chain attestation...');
     console.log('This creates a permanent, verifiable proof of delivery on Base.');
 
-    const attestation = await client.eas.attestDeliveryProof(
+    const attestation = await provider.eas.attestDeliveryProof(
       proof,
-      myAddress, // Recipient (provider address)
+      requesterAddress, // Recipient = requester (consumer)
       {
         revocable: true, // Allow revocation if needed
         expirationTime: 0 // Never expires (use deadline + 30 days in production)
@@ -146,36 +165,29 @@ async function main() {
     console.log(`  UID: ${attestation.uid}`);
     console.log(`  Transaction: ${attestation.transactionHash.substring(0, 10)}...`);
 
-    // 6. Anchor attestation to transaction
-    logSection('Step 4: Anchor Attestation');
+    // 6. Mark as delivered (provider signs)
+    logSection('Step 4: Deliver Work');
 
-    log('⚓', 'Anchoring attestation to transaction...');
-
-    await client.kernel.anchorAttestation(txId, attestation.uid);
-
-    log('✅', 'Attestation anchored!');
-
-    // 7. Mark as delivered
     log('📦', 'Transitioning to DELIVERED...');
 
-    await client.kernel.transitionState(
+    await provider.kernel.transitionState(
       txId,
       State.DELIVERED,
-      client.proofGenerator.encodeProof(proof)
+      provider.proofGenerator.encodeProof(proof)
     );
 
-    tx = await client.kernel.getTransaction(txId);
+    tx = await requester.kernel.getTransaction(txId);
     console.log(`State: ${formatState(tx.state)}`);
     console.log(`Attestation UID (from metadata): ${tx.metadata}`);
 
-    // 8. Verify attestation (requester side)
+    // 7. Verify attestation (requester side)
     logSection('Step 5: Verify Attestation');
 
     log('🔍', 'Verifying attestation before settlement...');
 
     try {
       // Get attestation from EAS
-      const onChainAttestation = await client.eas.getAttestation(attestation.uid);
+      const onChainAttestation = await requester.eas.getAttestation(attestation.uid);
 
       console.log('\nAttestation Details:');
       console.log(`  Schema: ${onChainAttestation.schema.substring(0, 10)}...`);
@@ -186,7 +198,7 @@ async function main() {
       console.log(`  Revoked: ${onChainAttestation.revocationTime > 0n ? 'Yes' : 'No'}`);
 
       // Verify attestation matches transaction
-      const isValid = await client.eas.verifyDeliveryAttestation(txId, attestation.uid);
+      const isValid = await requester.eas.verifyDeliveryAttestation(txId, attestation.uid);
 
       log('✅', `Attestation verified: ${isValid}`);
 
@@ -200,8 +212,15 @@ async function main() {
       throw error;
     }
 
+    // 8. (Optional) Anchor attestation on-chain for auditability
+    // Note: V1 contracts do NOT validate the UID; anchoring is cosmetic until V2.
+    logSection('Step 6: Anchor Attestation (optional)');
+    log('⚓', 'Anchoring attestation to transaction (cosmetic in V1)...');
+    await requester.kernel.anchorAttestation(txId, attestation.uid);
+    log('✅', 'Attestation UID anchored (no on-chain validation in V1)');
+
     // 9. Safe settlement with verification
-    logSection('Step 6: Secure Settlement');
+    logSection('Step 7: Secure Settlement');
 
     log('💸', 'Using releaseEscrowWithVerification() for secure settlement...');
     console.log('This method automatically verifies attestation before releasing funds.');
@@ -210,9 +229,9 @@ async function main() {
     console.log(`\nWaiting for dispute window (${disputeWindow} seconds)...`);
     await new Promise(resolve => setTimeout(resolve, disputeWindow * 1000));
 
-    await client.releaseEscrowWithVerification(txId, attestation.uid);
+    await requester.releaseEscrowWithVerification(txId, attestation.uid);
 
-    tx = await client.kernel.getTransaction(txId);
+    tx = await requester.kernel.getTransaction(txId);
     log('✅', `State: ${formatState(tx.state)}`);
     console.log('Payment released securely with attestation verification!');
 

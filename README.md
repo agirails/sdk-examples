@@ -7,9 +7,11 @@ Complete, production-ready examples demonstrating the AGIRAILS SDK for the Agent
 ### Prerequisites
 
 - **Node.js** >= 16.0.0
-- **Base Sepolia testnet wallet** with:
-  - ~0.01 ETH for gas ([get from faucet](https://portal.cdp.coinbase.com/products/faucet))
-  - ~50 USDC for testing (contact team or see [Installation Guide](https://docs.agirails.io/installation))
+- **Base Sepolia testnet wallets** with:
+  - Requester key: ~0.01 ETH + ~50 USDC
+  - Provider key: ~0.01 ETH (can reuse USDC from requester if desired)
+  - Use faucets for ETH ([get from faucet](https://portal.cdp.coinbase.com/products/faucet))
+  - Contact team for USDC or see [Installation Guide](https://docs.agirails.io/installation))
 - Basic TypeScript/JavaScript knowledge
 
 ### Installation
@@ -24,7 +26,7 @@ npm install
 
 # Configure environment
 cp .env.example .env
-# Edit .env and add your PRIVATE_KEY (without 0x prefix)
+# Edit .env and add your PRIVATE_KEY (requester) and PROVIDER_PRIVATE_KEY (provider) without 0x prefix
 ```
 
 ### Run Examples
@@ -62,7 +64,7 @@ npm run example:eas
 5. Wait for dispute window
 6. Release escrow (settle payment)
 
-**Gas cost**: ~365k gas (~$0.004 on Base Sepolia)
+**Gas note**: End-to-end lifecycle touches multiple contracts (kernel + escrow + token). Expect several hundred thousand gas across the flow; actual cost depends on network conditions.
 
 **Learn about**:
 - Transaction creation with deadlines
@@ -85,7 +87,7 @@ npm run example:eas
 3. Requester raises dispute with reason and evidence
 4. Explains resolution process (requires mediator)
 
-**Gas cost**: ~250k gas (~$0.003)
+**Gas note**: Dispute paths add extra calls; expect higher gas than happy-path.
 
 **Learn about**:
 - Raising disputes with evidence (IPFS)
@@ -107,7 +109,7 @@ npm run example:eas
 3. Batch state transitions
 4. Performance metrics and gas analysis
 
-**Gas cost**: ~1M gas for 3 transactions (~$0.01)
+**Gas note**: Batch creation/funding multiplies gas by count; use for throughput, not savings.
 
 **Learn about**:
 - Promise.all for parallel execution
@@ -130,7 +132,7 @@ npm run example:eas
 4. Query transaction history
 5. Proper cleanup (unsubscribe)
 
-**Gas cost**: ~200k gas (~$0.002)
+**Gas note**: Event subscriptions are off-chain; on-chain queries still cost gas.
 
 **Learn about**:
 - Event listeners and subscriptions
@@ -154,7 +156,7 @@ npm run example:eas
 4. Verify attestation before settlement
 5. Secure settlement with verification
 
-**Gas cost**: ~400k gas (~$0.004)
+**Gas note**: EAS attestation + verification adds extra on-chain cost; factor in attestation fees.
 
 **Learn about**:
 - EAS attestation creation
