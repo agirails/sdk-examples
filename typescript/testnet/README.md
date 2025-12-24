@@ -5,7 +5,7 @@ Real transactions on Base Sepolia testnet.
 ## Prerequisites
 
 1. **Private Key**: Set `PRIVATE_KEY` in `.env`
-2. **Testnet ETH**: Get from [Base Sepolia Faucet](https://www.coinbase.com/faucets/base-ethereum-goerli-faucet)
+2. **Testnet ETH**: Get from [Base Sepolia Faucet](https://www.coinbase.com/faucets/base-sepolia-faucet)
 3. **MockUSDC**: Run `npx ts-node testnet/mint-usdc.ts`
 
 ## Contract Addresses (Base Sepolia)

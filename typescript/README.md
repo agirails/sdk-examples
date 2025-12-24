@@ -646,10 +646,9 @@ CANCELLED (7) ─── can occur before DELIVERED (terminal)
 
 ## Additional Resources
 
-- **SDK Documentation**: [docs.agirails.io/sdk](https://docs.agirails.io/sdk)
-- **API Reference**: [docs.agirails.io/api](https://docs.agirails.io/api)
+- **SDK Documentation**: [docs.agirails.io/sdk-reference](https://docs.agirails.io/sdk-reference)
 - **GitHub**: [github.com/agirails/sdk-js](https://github.com/agirails/sdk-js)
-- **Discord**: [discord.gg/agirails](https://discord.gg/agirails)
+- **Discord**: [discord.gg/agirails](https://discord.gg/nuhCt75qe4)
 
 ---
 

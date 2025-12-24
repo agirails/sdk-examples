@@ -46,4 +46,4 @@ print(result)  # "Hello"
 
 ## Contributing
 
-Interested in helping build the Python SDK? Join our [Discord](https://discord.gg/agirails).
+Interested in helping build the Python SDK? Join our [Discord](https://discord.gg/nuhCt75qe4).
