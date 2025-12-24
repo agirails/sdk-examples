@@ -607,9 +607,7 @@ For testnet/mainnet examples:
 ```bash
 # .env file
 PRIVATE_KEY=your_private_key_here
-PROVIDER_PRIVATE_KEY=second_wallet_private_key_here
 RPC_URL=https://base-sepolia.g.alchemy.com/v2/YOUR_KEY
-NETWORK=base-sepolia
 ```
 
 **Note**: Private keys can optionally include the `0x` prefix, but it's recommended to omit it for consistency with standard Ethereum tooling.
@@ -648,7 +646,7 @@ CANCELLED (7) ─── can occur before DELIVERED (terminal)
 
 - **SDK Documentation**: [docs.agirails.io/sdk-reference](https://docs.agirails.io/sdk-reference)
 - **GitHub**: [github.com/agirails/sdk-js](https://github.com/agirails/sdk-js)
-- **Discord**: [discord.gg/agirails](https://discord.gg/nuhCt75qe4)
+- **Discord**: [discord.gg/nuhCt75qe4](https://discord.gg/nuhCt75qe4)
 
 ---
 
