@@ -16,7 +16,13 @@
     "sourceMap": true
   },
   "include": [
-    "examples/**/*",
+    "basic/**/*",
+    "standard/**/*",
+    "advanced/**/*",
+    "patterns/**/*",
+    "integrations/**/*",
+    "usecases/**/*",
+    "testnet/**/*",
     "src/**/*"
   ],
   "exclude": [

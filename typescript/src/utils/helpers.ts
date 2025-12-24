@@ -2,34 +2,37 @@
  * Shared utilities for AGIRAILS SDK examples
  */
 
-import { State } from '@agirails/sdk';
 import { formatUnits } from 'ethers';
 
 /**
  * Format USDC amount (6 decimals) to human-readable string
  */
-export function formatUSDC(amount: bigint): string {
-  return `$${formatUnits(amount, 6)} USDC`;
+export function formatUSDC(amount: bigint | string | number): string {
+  const value = typeof amount === 'bigint' ? amount : BigInt(amount);
+  return `$${formatUnits(value, 6)} USDC`;
 }
+
+/**
+ * State colors for terminal output
+ */
+const STATE_COLORS: Record<string, string> = {
+  INITIATED: '\x1b[33m',      // Yellow
+  QUOTED: '\x1b[36m',         // Cyan
+  COMMITTED: '\x1b[34m',      // Blue
+  IN_PROGRESS: '\x1b[35m',    // Magenta
+  DELIVERED: '\x1b[32m',      // Green
+  SETTLED: '\x1b[32m\x1b[1m', // Bold Green
+  DISPUTED: '\x1b[31m',       // Red
+  CANCELLED: '\x1b[90m',      // Gray
+};
 
 /**
  * Get colored state name for terminal output
  */
-export function formatState(state: State): string {
-  const colors = {
-    [State.INITIATED]: '\x1b[33m',    // Yellow
-    [State.QUOTED]: '\x1b[36m',       // Cyan
-    [State.COMMITTED]: '\x1b[34m',    // Blue
-    [State.IN_PROGRESS]: '\x1b[35m',  // Magenta
-    [State.DELIVERED]: '\x1b[32m',    // Green
-    [State.SETTLED]: '\x1b[32m\x1b[1m', // Bold Green
-    [State.DISPUTED]: '\x1b[31m',     // Red
-    [State.CANCELLED]: '\x1b[90m'     // Gray
-  };
-
+export function formatState(state: string): string {
   const reset = '\x1b[0m';
-  const color = colors[state] || '';
-  return `${color}${State[state]}${reset}`;
+  const color = STATE_COLORS[state] || '';
+  return `${color}${state}${reset}`;
 }
 
 /**
@@ -114,6 +117,23 @@ export function timeUntilDeadline(deadline: number): string {
 
   if (hours > 0) return `${hours}h ${minutes}m`;
   return `${minutes}m`;
+}
+
+/**
+ * Wait for a provider to be ready (status = 'running')
+ * Use this after provide() to ensure the service is registered before making requests
+ */
+export async function waitForProvider(
+  provider: { status: string },
+  maxWait = 5000
+): Promise<void> {
+  const start = Date.now();
+  while (provider.status !== 'running' && Date.now() - start < maxWait) {
+    await sleep(100);
+  }
+  if (provider.status !== 'running') {
+    throw new Error(`Provider failed to start (status: ${provider.status})`);
+  }
 }
 
 /**

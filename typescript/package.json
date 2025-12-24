@@ -1,0 +1,52 @@
+{
+  "name": "@agirails/sdk-examples",
+  "version": "2.0.0",
+  "description": "AGIRAILS SDK examples organized by API level: Basic, Standard, and Advanced",
+  "main": "index.js",
+  "scripts": {
+    "basic:hello": "ts-node basic/01-hello-world.ts",
+    "basic:echo": "ts-node basic/02-echo-service.ts",
+    "basic:translation": "ts-node basic/03-translation-service.ts",
+    "standard:lifecycle": "ts-node standard/01-agent-lifecycle.ts",
+    "standard:pricing": "ts-node standard/02-pricing-strategy.ts",
+    "standard:filtering": "ts-node standard/03-job-filtering.ts",
+    "standard:events": "ts-node standard/04-events-and-stats.ts",
+    "standard:multi": "ts-node standard/05-multi-service-agent.ts",
+    "advanced:lifecycle": "ts-node advanced/01-transaction-lifecycle.ts",
+    "advanced:dispute": "ts-node advanced/02-dispute-flow.ts",
+    "advanced:batch": "ts-node advanced/03-batch-operations.ts",
+    "advanced:events": "ts-node advanced/04-event-monitoring.ts",
+    "advanced:eas": "ts-node advanced/05-eas-attestations.ts",
+    "advanced:protocol": "ts-node advanced/06-direct-protocol.ts"
+  },
+  "keywords": [
+    "agirails",
+    "actp",
+    "blockchain",
+    "escrow",
+    "payments",
+    "ai-agents",
+    "examples"
+  ],
+  "author": "AGIRAILS",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@agirails/sdk": "^2.0.0",
+    "dotenv": "^16.3.1",
+    "ethers": "^6.15.0"
+  },
+  "devDependencies": {
+    "@langchain/core": "^1.1.8",
+    "@langchain/openai": "^1.2.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^20.10.0",
+    "express": "^5.2.1",
+    "langchain": "^1.2.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3",
+    "zod": "^4.2.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
