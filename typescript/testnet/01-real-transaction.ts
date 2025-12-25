@@ -100,7 +100,7 @@ async function main() {
   const providerAddress = process.env.PROVIDER_ADDRESS || '0x2222222222222222222222222222222222222222';
   const amount = '5'; // $5 USDC
 
-  const txId = await client.intermediate.createTransaction({
+  const txId = await client.standard.createTransaction({
     provider: providerAddress,
     amount: amount,
     deadline: '+1h',
@@ -114,7 +114,7 @@ async function main() {
 
   // Get transaction from blockchain
   console.log('[4/6] Fetching transaction from blockchain...');
-  const tx = await client.intermediate.getTransaction(txId);
+  const tx = await client.standard.getTransaction(txId);
   if (!tx) {
     console.log('ERROR: Transaction not found on-chain');
     process.exit(1);
@@ -130,7 +130,7 @@ async function main() {
   console.log('      This requires USDC approval + escrow creation...');
 
   try {
-    await client.intermediate.linkEscrow(txId);
+    await client.standard.linkEscrow(txId);
     console.log('      Escrow linked successfully!');
   } catch (error: any) {
     console.log('      Escrow linking failed:', error.message);
@@ -145,7 +145,7 @@ async function main() {
   // Final state
   console.log('');
   console.log('[6/6] Final transaction state...');
-  const finalTx = await client.intermediate.getTransaction(txId);
+  const finalTx = await client.standard.getTransaction(txId);
   console.log('      State:', finalTx?.state || 'Unknown');
   console.log('      Escrow ID:', finalTx?.escrowId || 'Not linked');
 

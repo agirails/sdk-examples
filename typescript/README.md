@@ -329,7 +329,7 @@ const client = await ACTPClient.create({
 });
 
 // Create transaction
-const txId = await client.intermediate.createTransaction({
+const txId = await client.standard.createTransaction({
   provider: '0x...',
   amount: '100', // $100 USDC
   deadline: '+24h',
@@ -337,14 +337,14 @@ const txId = await client.intermediate.createTransaction({
 });
 
 // Link escrow (funds locked)
-await client.intermediate.linkEscrow(txId);
+await client.standard.linkEscrow(txId);
 
 // State transitions
-await client.intermediate.transitionState(txId, 'IN_PROGRESS');
-await client.intermediate.transitionState(txId, 'DELIVERED');
+await client.standard.transitionState(txId, 'IN_PROGRESS');
+await client.standard.transitionState(txId, 'DELIVERED');
 
 // Release payment
-await client.intermediate.releaseEscrow(txId);
+await client.standard.releaseEscrow(txId);
 ```
 
 ```bash
@@ -568,11 +568,11 @@ const client = await ACTPClient.create({
   privateKey: '...', // for testnet/mainnet
 });
 
-// Intermediate adapter (standard operations)
-const txId = await client.intermediate.createTransaction({ ... });
-await client.intermediate.linkEscrow(txId);
-await client.intermediate.transitionState(txId, 'DELIVERED');
-await client.intermediate.releaseEscrow(txId);
+// Standard adapter (balanced control)
+const txId = await client.standard.createTransaction({ ... });
+await client.standard.linkEscrow(txId);
+await client.standard.transitionState(txId, 'DELIVERED');
+await client.standard.releaseEscrow(txId);
 
 // Advanced adapter (full control)
 const runtime = client.advanced as BlockchainRuntime;

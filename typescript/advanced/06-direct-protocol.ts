@@ -43,8 +43,8 @@ async function main() {
   console.log('');
   console.log('┌─────────────────────────────────────────────────────────────┐');
   console.log('│  ACTPClient                                                 │');
-  console.log('│  ├── beginner (BeginnerAdapter)                             │');
-  console.log('│  ├── intermediate (IntermediateAdapter)                     │');
+  console.log('│  ├── basic (BasicAdapter)                             │');
+  console.log('│  ├── standard (StandardAdapter)                     │');
   console.log('│  └── advanced (IACTPRuntime)                                │');
   console.log('│       └── BlockchainRuntime (testnet/mainnet)               │');
   console.log('│            ├── getKernel() → ACTPKernel                     │');

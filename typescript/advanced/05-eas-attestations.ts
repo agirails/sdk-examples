@@ -124,7 +124,7 @@ async function main() {
   await client.mintTokens(requesterAddress, '100000000');
 
   log('📝', 'Creating transaction...');
-  const txId = await client.intermediate.createTransaction({
+  const txId = await client.standard.createTransaction({
     provider: providerAddress,
     amount: '50',
     deadline: '+2h',
@@ -134,7 +134,7 @@ async function main() {
   console.log(`   Transaction: ${txId.substring(0, 16)}...`);
 
   log('💳', 'Linking escrow...');
-  await client.intermediate.linkEscrow(txId);
+  await client.standard.linkEscrow(txId);
 
   log('📦', 'Provider completes work and creates proof...');
 
@@ -156,9 +156,9 @@ async function main() {
   console.log(`     Content Hash: ${proof.contentHash.substring(0, 20)}...`);
 
   log('✅', 'Transitioning to DELIVERED with proof...');
-  await client.intermediate.transitionState(txId, 'DELIVERED');
+  await client.standard.transitionState(txId, 'DELIVERED');
 
-  const tx = await client.intermediate.getTransaction(txId);
+  const tx = await client.standard.getTransaction(txId);
   console.log(`   State: ${formatState(tx!.state)}`);
 
   // =====================================================

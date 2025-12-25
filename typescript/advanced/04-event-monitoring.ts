@@ -34,7 +34,7 @@ class TransactionWatcher {
 
     const interval = setInterval(async () => {
       try {
-        const tx = await this.client.intermediate.getTransaction(txId);
+        const tx = await this.client.standard.getTransaction(txId);
         if (tx && tx.state !== lastState) {
           const oldState = lastState;
           lastState = tx.state;
@@ -88,7 +88,7 @@ async function main() {
   const watcher = new TransactionWatcher(client);
 
   log('📝', 'Creating transaction...');
-  const txId = await client.intermediate.createTransaction({
+  const txId = await client.standard.createTransaction({
     provider: providerAddress,
     amount: '25',
     deadline: '+1h',
@@ -111,13 +111,13 @@ async function main() {
   log('🔄', 'Performing state transitions...');
 
   await sleep(500);
-  await client.intermediate.linkEscrow(txId);
+  await client.standard.linkEscrow(txId);
 
   await sleep(500);
-  await client.intermediate.transitionState(txId, 'IN_PROGRESS');
+  await client.standard.transitionState(txId, 'IN_PROGRESS');
 
   await sleep(500);
-  await client.intermediate.transitionState(txId, 'DELIVERED');
+  await client.standard.transitionState(txId, 'DELIVERED');
 
   await sleep(500);
 
@@ -132,7 +132,7 @@ async function main() {
   logSection('Method 2: Wait for State');
 
   log('📝', 'Creating another transaction...');
-  const txId2 = await client.intermediate.createTransaction({
+  const txId2 = await client.standard.createTransaction({
     provider: providerAddress,
     amount: '15',
     deadline: '+1h',
@@ -152,7 +152,7 @@ async function main() {
     const pollInterval = 500;
 
     while (Date.now() - startTime < timeout) {
-      const tx = await client.intermediate.getTransaction(txId);
+      const tx = await client.standard.getTransaction(txId);
       if (tx && tx.state === targetState) {
         return true;
       }
@@ -167,7 +167,7 @@ async function main() {
 
   // Trigger transition in background
   setTimeout(async () => {
-    await client.intermediate.linkEscrow(txId2);
+    await client.standard.linkEscrow(txId2);
   }, 1000);
 
   const reached = await waitForState(client, txId2, 'COMMITTED', 5000);
@@ -183,7 +183,7 @@ async function main() {
   // Manually query both transactions (getAllTransactions not available in this adapter)
   const transactionIds = [txId, txId2];
   const allTransactions = await Promise.all(
-    transactionIds.map(id => client.intermediate.getTransaction(id))
+    transactionIds.map(id => client.standard.getTransaction(id))
   );
 
   console.log(`   Total transactions: ${allTransactions.length}`);

@@ -45,7 +45,7 @@ async function main() {
   logSection('Scenario 1: Provider Wins Dispute');
 
   log('📝', 'Creating transaction...');
-  const txId1 = await requesterClient.intermediate.createTransaction({
+  const txId1 = await requesterClient.standard.createTransaction({
     provider: providerAddress,
     amount: '20', // $20 USDC
     deadline: '+1h',
@@ -55,18 +55,18 @@ async function main() {
   console.log(`   Transaction: ${txId1.substring(0, 16)}...`);
 
   log('💳', 'Linking escrow...');
-  await requesterClient.intermediate.linkEscrow(txId1);
+  await requesterClient.standard.linkEscrow(txId1);
 
   log('📦', 'Provider delivers work...');
-  await requesterClient.intermediate.transitionState(txId1, 'DELIVERED');
+  await requesterClient.standard.transitionState(txId1, 'DELIVERED');
 
-  let tx1 = await requesterClient.intermediate.getTransaction(txId1);
+  let tx1 = await requesterClient.standard.getTransaction(txId1);
   console.log(`   State: ${formatState(tx1!.state)}`);
 
   log('⚠️', 'Requester raises dispute...');
   await requesterClient.advanced.transitionState(txId1, 'DISPUTED');
 
-  tx1 = await requesterClient.intermediate.getTransaction(txId1);
+  tx1 = await requesterClient.standard.getTransaction(txId1);
   console.log(`   State: ${formatState(tx1!.state)}`);
 
   log('⚖️', 'Mediator resolves: PROVIDER WINS');
@@ -85,7 +85,7 @@ async function main() {
   logSection('Scenario 2: Requester Wins Dispute');
 
   log('📝', 'Creating transaction...');
-  const txId2 = await requesterClient.intermediate.createTransaction({
+  const txId2 = await requesterClient.standard.createTransaction({
     provider: providerAddress,
     amount: '30', // $30 USDC
     deadline: '+1h',
@@ -95,15 +95,15 @@ async function main() {
   console.log(`   Transaction: ${txId2.substring(0, 16)}...`);
 
   log('💳', 'Linking escrow...');
-  await requesterClient.intermediate.linkEscrow(txId2);
+  await requesterClient.standard.linkEscrow(txId2);
 
   log('📦', 'Provider delivers (but work is substandard)...');
-  await requesterClient.intermediate.transitionState(txId2, 'DELIVERED');
+  await requesterClient.standard.transitionState(txId2, 'DELIVERED');
 
   log('⚠️', 'Requester raises dispute...');
   await requesterClient.advanced.transitionState(txId2, 'DISPUTED');
 
-  const tx2 = await requesterClient.intermediate.getTransaction(txId2);
+  const tx2 = await requesterClient.standard.getTransaction(txId2);
   console.log(`   State: ${formatState(tx2!.state)}`);
 
   log('⚖️', 'Mediator resolves: REQUESTER WINS');
@@ -117,7 +117,7 @@ async function main() {
   logSection('Scenario 3: Split Resolution');
 
   log('📝', 'Creating transaction...');
-  const txId3 = await requesterClient.intermediate.createTransaction({
+  const txId3 = await requesterClient.standard.createTransaction({
     provider: providerAddress,
     amount: '50', // $50 USDC
     deadline: '+1h',
@@ -127,15 +127,15 @@ async function main() {
   console.log(`   Transaction: ${txId3.substring(0, 16)}...`);
 
   log('💳', 'Linking escrow...');
-  await requesterClient.intermediate.linkEscrow(txId3);
+  await requesterClient.standard.linkEscrow(txId3);
 
   log('📦', 'Provider delivers (partial completion)...');
-  await requesterClient.intermediate.transitionState(txId3, 'DELIVERED');
+  await requesterClient.standard.transitionState(txId3, 'DELIVERED');
 
   log('⚠️', 'Requester raises dispute...');
   await requesterClient.advanced.transitionState(txId3, 'DISPUTED');
 
-  const tx3 = await requesterClient.intermediate.getTransaction(txId3);
+  const tx3 = await requesterClient.standard.getTransaction(txId3);
   console.log(`   State: ${formatState(tx3!.state)}`);
 
   log('⚖️', 'Mediator resolves: 60/40 SPLIT');

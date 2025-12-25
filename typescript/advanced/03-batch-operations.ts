@@ -49,7 +49,7 @@ async function main() {
   const startCreate = Date.now();
 
   const createPromises = providers.map((provider, index) =>
-    client.intermediate.createTransaction({
+    client.standard.createTransaction({
       provider,
       amount: String(10 + index * 5), // $10, $15, $20, $25, $30
       deadline: '+2h',
@@ -73,7 +73,7 @@ async function main() {
   log('💳', 'Linking escrow for all transactions...');
   const startLink = Date.now();
 
-  const linkPromises = txIds.map((txId) => client.intermediate.linkEscrow(txId));
+  const linkPromises = txIds.map((txId) => client.standard.linkEscrow(txId));
 
   await Promise.all(linkPromises);
   const linkTime = Date.now() - startLink;
@@ -87,7 +87,7 @@ async function main() {
 
   log('🔍', 'Checking all transaction statuses...');
 
-  const statusPromises = txIds.map((txId) => client.intermediate.getTransaction(txId));
+  const statusPromises = txIds.map((txId) => client.standard.getTransaction(txId));
   const transactions = await Promise.all(statusPromises);
 
   console.log('   Status report:');
@@ -111,7 +111,7 @@ async function main() {
   const startTransition = Date.now();
 
   const progressPromises = txIds.map((txId) =>
-    client.intermediate.transitionState(txId, 'IN_PROGRESS')
+    client.standard.transitionState(txId, 'IN_PROGRESS')
   );
 
   await Promise.all(progressPromises);
@@ -122,7 +122,7 @@ async function main() {
   log('📦', 'Transitioning all to DELIVERED...');
 
   const deliverPromises = txIds.map((txId) =>
-    client.intermediate.transitionState(txId, 'DELIVERED')
+    client.standard.transitionState(txId, 'DELIVERED')
   );
 
   await Promise.all(deliverPromises);
@@ -146,7 +146,7 @@ async function main() {
 
   const results = await Promise.allSettled(
     mixedProviders.map((provider) =>
-      client.intermediate.createTransaction({
+      client.standard.createTransaction({
         provider,
         amount: '5',
         deadline: '+1h',

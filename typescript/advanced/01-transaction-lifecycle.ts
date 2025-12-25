@@ -9,7 +9,7 @@
  *
  * This example demonstrates:
  * - ACTPClient creation and configuration
- * - Three API levels: beginner, intermediate, advanced
+ * - Three API levels: basic, standard, advanced
  * - Full transaction lifecycle control
  * - Escrow management
  *
@@ -42,31 +42,31 @@ async function main() {
   console.log(`   Balance: ${Number(balance) / 1_000_000} USDC`);
 
   // =====================================================
-  // METHOD 1: Beginner API (simplest)
+  // METHOD 1: Basic API (simplest)
   // =====================================================
-  logSection('Method 1: Beginner API');
+  logSection('Method 1: Basic API');
 
-  log('📝', 'Using beginner.pay() - one call does everything');
+  log('📝', 'Using basic.pay() - one call does everything');
 
-  const beginnerResult = await client.beginner.pay({
+  const basicResult = await client.basic.pay({
     to: '0x2222222222222222222222222222222222222222',
     amount: '10', // $10 USDC
     deadline: '+2h', // 2 hours from now
     disputeWindow: 3600, // 1 hour minimum
   });
 
-  console.log(`   Transaction ID: ${beginnerResult.txId.substring(0, 16)}...`);
-  console.log(`   Amount: ${beginnerResult.amount}`);
-  console.log(`   State: ${beginnerResult.state}`); // Already COMMITTED!
+  console.log(`   Transaction ID: ${basicResult.txId.substring(0, 16)}...`);
+  console.log(`   Amount: ${basicResult.amount}`);
+  console.log(`   State: ${basicResult.state}`); // Already COMMITTED!
 
   // =====================================================
-  // METHOD 2: Intermediate API (more control)
+  // METHOD 2: Standard API (more control)
   // =====================================================
-  logSection('Method 2: Intermediate API');
+  logSection('Method 2: Standard API');
 
   log('📝', 'Step 1: Create transaction');
 
-  const txId = await client.intermediate.createTransaction({
+  const txId = await client.standard.createTransaction({
     provider: '0x3333333333333333333333333333333333333333',
     amount: '25', // $25 USDC
     deadline: '+3h',
@@ -76,26 +76,26 @@ async function main() {
   console.log(`   Transaction ID: ${txId.substring(0, 16)}...`);
 
   // Get transaction details
-  let tx = await client.intermediate.getTransaction(txId);
+  let tx = await client.standard.getTransaction(txId);
   if (!tx) throw new Error('Transaction not found');
   console.log(`   State: ${formatState(tx.state)}`);
 
   log('💳', 'Step 2: Link escrow (locks funds)');
-  await client.intermediate.linkEscrow(txId);
+  await client.standard.linkEscrow(txId);
 
-  tx = await client.intermediate.getTransaction(txId);
+  tx = await client.standard.getTransaction(txId);
   console.log(`   State: ${formatState(tx!.state)}`); // COMMITTED
 
   log('🔨', 'Step 3: Transition to IN_PROGRESS');
-  await client.intermediate.transitionState(txId, 'IN_PROGRESS');
+  await client.standard.transitionState(txId, 'IN_PROGRESS');
 
-  tx = await client.intermediate.getTransaction(txId);
+  tx = await client.standard.getTransaction(txId);
   console.log(`   State: ${formatState(tx!.state)}`);
 
   log('📦', 'Step 4: Transition to DELIVERED');
-  await client.intermediate.transitionState(txId, 'DELIVERED');
+  await client.standard.transitionState(txId, 'DELIVERED');
 
-  tx = await client.intermediate.getTransaction(txId);
+  tx = await client.standard.getTransaction(txId);
   console.log(`   State: ${formatState(tx!.state)}`);
 
   // Wait for dispute window (use time manipulation in mock mode)
@@ -104,9 +104,9 @@ async function main() {
   await runtime.time.advanceTime(3700); // Advance 1 hour + 100 seconds
 
   log('💸', 'Step 5: Release escrow');
-  await client.intermediate.releaseEscrow(tx!.escrowId!);
+  await client.standard.releaseEscrow(tx!.escrowId!);
 
-  tx = await client.intermediate.getTransaction(txId);
+  tx = await client.standard.getTransaction(txId);
   console.log(`   State: ${formatState(tx!.state)}`); // SETTLED
 
   // =====================================================
@@ -151,8 +151,8 @@ async function main() {
   logSection('Summary');
 
   console.log('Transactions created in this demo:');
-  console.log(`  - Beginner API: ${beginnerResult.txId.substring(0, 12)}...`);
-  console.log(`  - Intermediate API: ${txId.substring(0, 12)}...`);
+  console.log(`  - Basic API: ${basicResult.txId.substring(0, 12)}...`);
+  console.log(`  - Standard API: ${txId.substring(0, 12)}...`);
   console.log(`  - Advanced API: ${advTxId.substring(0, 12)}...`);
 
   // Check final balance
