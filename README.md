@@ -39,7 +39,7 @@ Both language implementations follow the same three-tier API design:
 
 - **SDK Documentation**: [docs.agirails.io/sdk-reference](https://docs.agirails.io/sdk-reference)
 - **GitHub**: [github.com/agirails](https://github.com/agirails)
-- **Discord**: [discord.gg/agirails](https://discord.gg/nuhCt75qe4)
+- **Discord**: [discord.gg/nuhCt75qe4](https://discord.gg/nuhCt75qe4)
 
 ## License
 

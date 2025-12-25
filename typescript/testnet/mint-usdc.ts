@@ -42,7 +42,7 @@ async function main() {
   if (ethBalance < ethers.parseEther('0.0001')) {
     console.log('');
     console.log('ERROR: Need ETH for gas');
-    console.log('Get from: https://www.coinbase.com/faucets/base-ethereum-goerli-faucet');
+    console.log('Get from: https://www.coinbase.com/faucets/base-sepolia-faucet');
     process.exit(1);
   }
 

@@ -7,7 +7,7 @@
  * Prerequisites:
  * 1. Set PRIVATE_KEY in .env (wallet with testnet ETH)
  * 2. Set PROVIDER_PRIVATE_KEY in .env (optional, for full flow)
- * 3. Get testnet ETH from https://www.coinbase.com/faucets/base-ethereum-goerli-faucet
+ * 3. Get testnet ETH from https://www.coinbase.com/faucets/base-sepolia-faucet
  * 4. Mint MockUSDC: npx ts-node testnet/mint-usdc.ts
  *
  * Contract Addresses (Base Sepolia):
@@ -74,7 +74,7 @@ async function main() {
   if (ethBalance < ethers.parseEther('0.001')) {
     console.log('');
     console.log('ERROR: Insufficient ETH for gas');
-    console.log('Get testnet ETH from: https://www.coinbase.com/faucets/base-ethereum-goerli-faucet');
+    console.log('Get testnet ETH from: https://www.coinbase.com/faucets/base-sepolia-faucet');
     process.exit(1);
   }
 
