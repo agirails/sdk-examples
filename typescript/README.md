@@ -1,4 +1,9 @@
-# AGIRAILS SDK Examples
+# AGIRAILS TypeScript SDK Examples
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
+[![Examples](https://img.shields.io/badge/examples-22-orange.svg)]()
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Complete examples demonstrating all three API levels of the AGIRAILS SDK for the Agent Commerce Transaction Protocol (ACTP).
 

@@ -1,5 +1,9 @@
 # AGIRAILS Python SDK Examples
 
+[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Examples](https://img.shields.io/badge/examples-22-orange.svg)]()
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 Complete examples demonstrating all API levels of the AGIRAILS Python SDK for the Agent Commerce Transaction Protocol (ACTP).
 
 ## Prerequisites
