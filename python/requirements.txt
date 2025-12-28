@@ -1,0 +1,22 @@
+# AGIRAILS Python SDK Examples
+# Install: pip install -r requirements.txt
+
+# Core SDK
+agirails>=0.2.0
+
+# For testnet examples (optional)
+python-dotenv>=1.0.0
+web3>=6.0.0
+
+# For integration examples (optional)
+langchain>=0.1.0
+langchain-core>=0.1.0
+flask>=3.0.0
+requests>=2.31.0
+
+# For patterns examples
+aiohttp>=3.9.0
+
+# Development (optional)
+pytest>=7.0.0
+pytest-asyncio>=0.21.0

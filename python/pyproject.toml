@@ -1,0 +1,64 @@
+[project]
+name = "agirails-examples"
+version = "0.1.0"
+description = "AGIRAILS Python SDK Examples"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "AGIRAILS Team", email = "developers@agirails.io"}
+]
+keywords = ["agirails", "actp", "ai", "agents", "blockchain", "escrow"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "agirails>=0.2.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+testnet = [
+    "web3>=6.0.0",
+]
+integrations = [
+    "langchain>=0.1.0",
+    "langchain-core>=0.1.0",
+    "flask>=3.0.0",
+    "requests>=2.31.0",
+    "aiohttp>=3.9.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "ruff>=0.1.0",
+]
+all = [
+    "agirails-examples[testnet,integrations,dev]",
+]
+
+[project.urls]
+Homepage = "https://agirails.io"
+Documentation = "https://docs.agirails.io"
+Repository = "https://github.com/agirails/sdk-examples"
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
