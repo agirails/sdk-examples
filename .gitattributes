@@ -1,0 +1,9 @@
+# Linguist configuration for GitHub language detection
+# Show both TypeScript and Python in repository languages
+
+*.ts linguist-detectable=true
+*.py linguist-detectable=true
+
+# Exclude generated files from language stats
+package-lock.json linguist-generated=true
+*.lock linguist-generated=true
