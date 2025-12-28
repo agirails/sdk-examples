@@ -61,7 +61,7 @@ async def main() -> None:
 
     # Service 1: Text Translation
     translation_pricing = PricingStrategy(
-        cost=CostModel(base=0.10, per_unit=0.005, unit="word"),
+        cost=CostModel(base=0.10, per_unit={"unit": "word", "rate": 0.005}),
         margin=0.30,
     )
 
@@ -99,7 +99,7 @@ async def main() -> None:
 
     # Service 2: Text Summarization
     summarize_pricing = PricingStrategy(
-        cost=CostModel(base=0.20, per_unit=0.01, unit="sentence"),
+        cost=CostModel(base=0.20, per_unit={"unit": "sentence", "rate": 0.01}),
         margin=0.25,
     )
 

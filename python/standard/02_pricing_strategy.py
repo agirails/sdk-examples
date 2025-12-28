@@ -42,8 +42,7 @@ async def main() -> None:
         # Base cost for running the service
         cost=CostModel(
             base=0.50,  # $0.50 base cost per job
-            per_unit=0.01,  # $0.01 per word
-            unit="word",
+            per_unit={"unit": "word", "rate": 0.01},  # $0.01 per word
         ),
         # Desired profit margin (40%)
         margin=0.40,
@@ -71,8 +70,9 @@ async def main() -> None:
         word_count = len(text.split())
         ctx.log.info(f"Translating {word_count} words to {target_lang}")
 
-        # Calculate expected cost
-        expected_cost = translation_pricing.cost.base + (word_count * translation_pricing.cost.per_unit)
+        # Calculate expected cost using cost model
+        per_unit_rate = translation_pricing.cost.per_unit.get("rate", 0) if translation_pricing.cost.per_unit else 0
+        expected_cost = translation_pricing.cost.base + (word_count * per_unit_rate)
         min_price = expected_cost / (1 - translation_pricing.margin)
 
         job_log.append({
@@ -124,7 +124,8 @@ async def main() -> None:
 
         # Calculate pricing
         word_count = len(test["input"]["text"].split())
-        cost = translation_pricing.cost.base + (word_count * translation_pricing.cost.per_unit)
+        per_unit_rate = translation_pricing.cost.per_unit.get("rate", 0) if translation_pricing.cost.per_unit else 0
+        cost = translation_pricing.cost.base + (word_count * per_unit_rate)
         min_price = cost / (1 - translation_pricing.margin)
 
         print(f"  Words: {word_count}")

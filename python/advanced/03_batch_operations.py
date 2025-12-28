@@ -101,27 +101,33 @@ async def main() -> None:
     # =====================================================
     log_section("Part 2: Batch State Transitions")
 
-    # Link escrow for all parallel transactions
-    log("💳", f"Linking escrow for {BATCH_SIZE} transactions...")
+    # Use sequential transactions for state transitions demo
+    demo_tx_ids = sequential_tx_ids[:3]
+
+    log("💳", f"Linking escrow for {len(demo_tx_ids)} transactions...")
     start = time.time()
+    linked_count = 0
 
-    async def link_escrow(tx_id: str) -> str:
-        await client.standard.link_escrow(tx_id)
-        return tx_id
+    for tx_id in demo_tx_ids:
+        tx = await client.standard.get_transaction(tx_id)
+        if tx and tx.state == "INITIATED":
+            await client.standard.link_escrow(tx_id)
+            linked_count += 1
 
-    await asyncio.gather(*[link_escrow(tx_id) for tx_id in parallel_tx_ids])
-    print(f"   Completed in {time.time() - start:.2f}s")
+    print(f"   Linked {linked_count}/{len(demo_tx_ids)} transactions in {time.time() - start:.2f}s")
 
     # Transition all to DELIVERED
-    log("📦", f"Transitioning {BATCH_SIZE} transactions to DELIVERED...")
+    log("📦", f"Transitioning {len(demo_tx_ids)} transactions to DELIVERED...")
     start = time.time()
+    delivered_count = 0
 
-    async def transition_to_delivered(tx_id: str) -> str:
-        await client.standard.transition_state(tx_id, "DELIVERED")
-        return tx_id
+    for tx_id in demo_tx_ids:
+        tx = await client.standard.get_transaction(tx_id)
+        if tx and tx.state in ("COMMITTED", "IN_PROGRESS"):
+            await client.standard.transition_state(tx_id, "DELIVERED")
+            delivered_count += 1
 
-    await asyncio.gather(*[transition_to_delivered(tx_id) for tx_id in parallel_tx_ids])
-    print(f"   Completed in {time.time() - start:.2f}s")
+    print(f"   Transitioned {delivered_count}/{len(demo_tx_ids)} transactions in {time.time() - start:.2f}s")
 
     # =====================================================
     # Part 3: Error Handling with allSettled Pattern
@@ -131,7 +137,7 @@ async def main() -> None:
     log("⚠️", "Demonstrating error handling with mixed results...")
 
     # Mix of valid and invalid transaction IDs
-    test_tx_ids = parallel_tx_ids[:3] + [
+    test_tx_ids = sequential_tx_ids[:3] + [
         "0x" + "0" * 64,  # Invalid TX ID
         "0x" + "1" * 64,  # Another invalid TX ID
     ]

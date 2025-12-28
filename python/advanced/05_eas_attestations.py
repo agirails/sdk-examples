@@ -44,31 +44,31 @@ async def main() -> None:
 
     log("📝", "Creating a delivery proof...")
 
-    # Generate a delivery proof
-    proof_builder = DeliveryProofBuilder()
-
+    # Generate a delivery proof using fluent builder API
     tx_id = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+    provider_address = "0x2222222222222222222222222222222222222222"
+    consumer_address = "0x1111111111111111111111111111111111111111"
     deliverable = {
         "result": "Translation completed",
         "wordCount": 500,
         "quality": "high",
     }
 
-    proof = proof_builder.build(
-        tx_id=tx_id,
-        provider_did="did:ethr:0x2222222222222222222222222222222222222222",
-        requester_did="did:ethr:0x1111111111111111111111111111111111111111",
-        service_type="translation",
-        input_hash=hashlib.sha256(b"input data").hexdigest(),
-        output_hash=hashlib.sha256(str(deliverable).encode()).hexdigest(),
-        result_cid="ipfs://QmYourDeliverableHash",
+    proof = (
+        DeliveryProofBuilder()
+        .for_transaction(tx_id)
+        .from_provider(provider_address)
+        .for_consumer(consumer_address)
+        .with_output(deliverable)
+        .with_result_cid("ipfs://QmYourDeliverableHash")
+        .build()
     )
 
     print("Delivery Proof Structure:")
     print(f"  Transaction ID: {proof.tx_id[:16]}...")
-    print(f"  Provider DID: {proof.provider_did[:30]}...")
-    print(f"  Output Hash: {proof.output_hash[:16]}...")
-    print(f"  Schema Version: {proof.schema_version}")
+    print(f"  Provider: {proof.provider[:16]}...")
+    print(f"  Result Hash: {proof.result_hash[:16]}...")
+    print(f"  Delivered At: {proof.delivered_at}")
     print()
 
     # =====================================================
@@ -154,19 +154,19 @@ async def main() -> None:
 
     log("📦", "Provider completes work and creates proof...")
 
-    # Provider generates delivery proof
-    proof = proof_builder.build(
-        tx_id=tx_id,
-        provider_did=f"did:ethr:{provider_address}",
-        requester_did=f"did:ethr:{requester_address}",
-        service_type="ai-analysis",
-        input_hash=hashlib.sha256(b"input").hexdigest(),
-        output_hash=hashlib.sha256(b"output").hexdigest(),
-        result_cid="ipfs://QmResultHash",
+    # Provider generates delivery proof using fluent builder
+    delivery_proof = (
+        DeliveryProofBuilder()
+        .for_transaction(tx_id)
+        .from_provider(provider_address)
+        .for_consumer(requester_address)
+        .with_output({"result": "AI analysis completed"})
+        .with_result_cid("ipfs://QmResultHash")
+        .build()
     )
 
     print("   Proof generated:")
-    print(f"     Output Hash: {proof.output_hash[:20]}...")
+    print(f"     Result Hash: {delivery_proof.result_hash[:20]}...")
 
     log("✅", "Transitioning to DELIVERED with proof...")
     await client.standard.transition_state(tx_id, "DELIVERED")

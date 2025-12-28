@@ -155,9 +155,14 @@ async def main() -> None:
     print(f"  Agent B: {format_usdc(agent_b_balance_before)} -> {format_usdc(agent_b_balance_after)}")
     print()
 
-    # Calculate fees
-    amount_transferred = agent_b_balance_after - agent_b_balance_before
-    agent_a_spent = agent_a_balance_before - agent_a_balance_after
+    # Calculate fees (convert string balances to numeric if needed)
+    def to_numeric(val):
+        if isinstance(val, str):
+            return int(float(val))
+        return val
+
+    amount_transferred = to_numeric(agent_b_balance_after) - to_numeric(agent_b_balance_before)
+    agent_a_spent = to_numeric(agent_a_balance_before) - to_numeric(agent_a_balance_after)
     platform_fee = agent_a_spent - amount_transferred
 
     print(f"Agent A spent: {format_usdc(agent_a_spent)}")

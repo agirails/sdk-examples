@@ -33,9 +33,24 @@ load_dotenv()
 try:
     from web3 import Web3
     from eth_account import Account
+    import requests as req_lib
     HAS_WEB3 = True
 except ImportError:
     HAS_WEB3 = False
+
+
+def create_web3(rpc_url: str) -> "Web3":
+    """Create Web3 instance with custom user-agent to avoid 403 from public RPCs."""
+    class CustomHTTPProvider(Web3.HTTPProvider):
+        def make_request(self, method, params):
+            response = req_lib.post(
+                self.endpoint_uri,
+                json={"jsonrpc": "2.0", "method": method, "params": params, "id": 1},
+                headers={"User-Agent": "Mozilla/5.0", "Content-Type": "application/json"},
+                timeout=30,
+            )
+            return response.json()
+    return Web3(CustomHTTPProvider(rpc_url))
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -101,10 +116,10 @@ async def main() -> None:
         print("Run: pip install web3")
         sys.exit(1)
 
-    # Check private key
-    private_key = os.getenv("PRIVATE_KEY")
+    # Check private key (try both names)
+    private_key = os.getenv("PRIVATE_KEY") or os.getenv("CLIENT_PRIVATE_KEY")
     if not private_key:
-        print("ERROR: PRIVATE_KEY not set in .env")
+        print("ERROR: PRIVATE_KEY or CLIENT_PRIVATE_KEY not set in .env")
         print()
         print("To run this example:")
         print("1. Create a .env file with PRIVATE_KEY=your_key_here")
@@ -125,8 +140,11 @@ async def main() -> None:
     print()
 
     # Connect to Base Sepolia
-    w3 = Web3(Web3.HTTPProvider(BASE_SEPOLIA_RPC))
-    if not w3.is_connected():
+    w3 = create_web3(BASE_SEPOLIA_RPC)
+    # Test connection
+    try:
+        w3.eth.block_number
+    except Exception:
         print(f"ERROR: Cannot connect to {BASE_SEPOLIA_RPC}")
         sys.exit(1)
 
@@ -187,16 +205,26 @@ async def main() -> None:
     # =====================================================
     log("3/6", "Creating transaction on-chain...")
 
-    provider_address = os.getenv(
-        "PROVIDER_ADDRESS", "0x2222222222222222222222222222222222222222"
-    )
-    amount = 5.0  # $5 USDC
+    # Get provider address - try PROVIDER_ADDRESS first, then derive from PROVIDER_PRIVATE_KEY
+    provider_address = os.getenv("PROVIDER_ADDRESS")
+    if not provider_address:
+        provider_key = os.getenv("PROVIDER_PRIVATE_KEY")
+        if provider_key:
+            provider_account = Account.from_key(provider_key)
+            provider_address = provider_account.address
+        else:
+            # Default to a dummy address for demo purposes
+            provider_address = "0x2222222222222222222222222222222222222222"
+            print("      Note: Using dummy provider address (set PROVIDER_ADDRESS in .env)")
+
+    amount_usdc = 5.0  # $5 USDC
+    amount_wei = parse_usdc(amount_usdc)  # Convert to wei (6 decimals)
 
     if client:
-        # Use SDK
+        # Use SDK - amount in wei as string
         tx_id = await client.standard.create_transaction({
             "provider": provider_address,
-            "amount": str(amount),
+            "amount": str(amount_wei),
             "deadline": "+1h",
             "dispute_window": 3600,  # 1 hour minimum
         })
@@ -209,7 +237,7 @@ async def main() -> None:
         ).hexdigest()
 
     print(f"      Transaction ID: {tx_id}")
-    print(f"      Amount: ${amount:.2f} USDC")
+    print(f"      Amount: ${amount_usdc:.2f} USDC")
     print(f"      Provider: {shorten_address(provider_address)}")
     print()
 
@@ -218,15 +246,23 @@ async def main() -> None:
     # =====================================================
     log("4/6", "Fetching transaction from blockchain...")
 
+    # Wait for block confirmation (Base Sepolia ~2s block time)
+    print("      Waiting for block confirmation...")
+    await asyncio.sleep(5)
+
     if client:
         tx = await client.standard.get_transaction(tx_id)
         if not tx:
             print("ERROR: Transaction not found on-chain")
+            print("      (This may be a timing issue - try running again)")
             sys.exit(1)
 
-        print(f"      State: {tx.get('state', 'INITIATED')}")
-        created_at = tx.get("createdAt", 0)
-        deadline = tx.get("deadline", 0)
+        # Handle both object and dict return types
+        state = getattr(tx, "state", None) or tx.get("state", "INITIATED") if isinstance(tx, dict) else tx.state
+        created_at = getattr(tx, "created_at", None) or getattr(tx, "createdAt", 0)
+        deadline = getattr(tx, "deadline", 0)
+
+        print(f"      State: {state}")
         if created_at:
             print(f"      Created: {datetime.fromtimestamp(created_at).isoformat()}")
         if deadline:
@@ -265,8 +301,14 @@ async def main() -> None:
 
     if client:
         final_tx = await client.standard.get_transaction(tx_id)
-        print(f"      State: {final_tx.get('state', 'Unknown') if final_tx else 'Unknown'}")
-        print(f"      Escrow ID: {final_tx.get('escrowId', 'Not linked') if final_tx else 'Not linked'}")
+        if final_tx:
+            final_state = getattr(final_tx, "state", "Unknown")
+            escrow_id = getattr(final_tx, "escrow_id", None) or getattr(final_tx, "escrowId", "Not linked")
+            print(f"      State: {final_state}")
+            print(f"      Escrow ID: {escrow_id}")
+        else:
+            print("      State: Unknown")
+            print("      Escrow ID: Not linked")
     else:
         print("      State: INITIATED (simulated)")
         print("      Escrow ID: Not linked")

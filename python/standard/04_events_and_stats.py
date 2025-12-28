@@ -159,11 +159,10 @@ async def main() -> None:
         print(f"Jobs Received:    {stats.jobs_received}")
         print(f"Jobs Completed:   {stats.jobs_completed}")
         print(f"Jobs Failed:      {stats.jobs_failed}")
-        print(f"Jobs In Progress: {stats.jobs_in_progress}")
         print(f"Total Earned:     ${stats.total_earned:.2f}")
         print(f"Total Spent:      ${stats.total_spent:.2f}")
         print(f"Success Rate:     {stats.success_rate:.1f}%")
-        print(f"Avg Job Time:     {stats.average_job_time}ms")
+        print(f"Avg Job Time:     {stats.average_job_time:.0f}ms")
 
     print("Initial stats:")
     print_stats()

@@ -65,14 +65,13 @@ async def main() -> None:
 
     log("🔧", "Creating runtime directly (without ACTPClient)...")
 
-    # Create mock runtime directly
+    # Create mock runtime directly (auto-initializes on first use)
     runtime = MockRuntime()
-    await runtime.initialize()
 
     requester = "0x1111111111111111111111111111111111111111"
     provider = "0x2222222222222222222222222222222222222222"
 
-    log("✅", "Runtime initialized")
+    log("✅", "Runtime ready")
     print(f"   Type: {type(runtime).__name__}")
     print(f"   Is Mock: {is_mock_runtime(runtime)}")
     print()
@@ -92,7 +91,7 @@ async def main() -> None:
     tx_id = await runtime.create_transaction(CreateTransactionParams(
         provider=provider,
         requester=requester,
-        amount=50_000_000,  # 50 USDC in wei
+        amount=str(50_000_000),  # 50 USDC in wei (as string)
         deadline=int(time.time()) + 7200,  # 2 hours
         dispute_window=3600,  # 1 hour
         service_description='{"service": "direct-protocol-demo"}',

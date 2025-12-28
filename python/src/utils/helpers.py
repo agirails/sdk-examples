@@ -54,17 +54,32 @@ def format_state(state: Any) -> str:
     return str(state)
 
 
-def format_usdc(amount: int, decimals: int = 6) -> str:
+def format_usdc(amount: Any, decimals: int = 6) -> str:
     """Format a USDC amount from wei to human-readable.
 
     Args:
-        amount: Amount in wei (smallest unit)
+        amount: Amount in wei (smallest unit) - can be int, float, or string
         decimals: Number of decimals (default: 6 for USDC)
 
     Returns:
         Formatted string like "$10.50"
     """
-    value = amount / (10 ** decimals)
+    # Handle string amounts (may already be formatted or in wei)
+    if isinstance(amount, str):
+        # Try to parse as float first (e.g., "10.50")
+        try:
+            value = float(amount)
+            # If it's a small number, assume it's already in USDC
+            if value < 1_000_000:
+                return f"${value:.2f}"
+            # Otherwise treat as wei
+            value = value / (10 ** decimals)
+            return f"${value:.2f}"
+        except ValueError:
+            return f"${amount}"
+
+    # Handle int/float amounts (wei)
+    value = float(amount) / (10 ** decimals)
     return f"${value:.2f}"
 
 

@@ -62,7 +62,7 @@ async def main() -> None:
         "to": "0x2222222222222222222222222222222222222222",
         "amount": 10,  # $10 USDC
         "deadline": "+2h",  # 2 hours from now
-        "dispute_window": 3600,  # 1 hour minimum
+        "description": "Basic API demo transaction",
     })
 
     print(f"   Transaction ID: {basic_result.tx_id[:16]}...")
@@ -131,16 +131,19 @@ async def main() -> None:
 
     runtime = client.advanced
 
-    # Create transaction with all parameters
+    # Create transaction with all parameters using dataclass
     import time
-    adv_tx_id = await runtime.create_transaction({
-        "provider": "0x4444444444444444444444444444444444444444",
-        "requester": my_address,
-        "amount": 50_000_000,  # 50 USDC in wei (6 decimals)
-        "deadline": int(time.time()) + 7200,  # 2 hours
-        "dispute_window": 3600,  # 1 hour (minimum allowed)
-        "service_description": '{"service": "advanced-demo", "input": {"data": "test"}}',
-    })
+    from agirails.runtime.base import CreateTransactionParams
+
+    adv_params = CreateTransactionParams(
+        provider="0x4444444444444444444444444444444444444444",
+        requester=my_address,
+        amount=str(50_000_000),  # 50 USDC in wei (6 decimals), as string
+        deadline=int(time.time()) + 7200,  # 2 hours
+        dispute_window=3600,  # 1 hour (minimum allowed)
+        service_description='{"service": "advanced-demo", "input": {"data": "test"}}',
+    )
+    adv_tx_id = await runtime.create_transaction(adv_params)
 
     print(f"   Transaction ID: {adv_tx_id[:16]}...")
 

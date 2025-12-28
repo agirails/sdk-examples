@@ -24,9 +24,24 @@ load_dotenv()
 try:
     from web3 import Web3
     from eth_account import Account
+    import requests as req_lib
     HAS_WEB3 = True
 except ImportError:
     HAS_WEB3 = False
+
+
+def create_web3(rpc_url: str) -> "Web3":
+    """Create Web3 instance with custom user-agent to avoid 403 from public RPCs."""
+    class CustomHTTPProvider(Web3.HTTPProvider):
+        def make_request(self, method, params):
+            response = req_lib.post(
+                self.endpoint_uri,
+                json={"jsonrpc": "2.0", "method": method, "params": params, "id": 1},
+                headers={"User-Agent": "Mozilla/5.0", "Content-Type": "application/json"},
+                timeout=30,
+            )
+            return response.json()
+    return Web3(CustomHTTPProvider(rpc_url))
 
 
 # Contract addresses (Base Sepolia)
@@ -80,10 +95,10 @@ def main() -> None:
         print("Run: pip install web3")
         sys.exit(1)
 
-    # Check private key
-    private_key = os.getenv("PRIVATE_KEY")
+    # Check private key (try both names)
+    private_key = os.getenv("PRIVATE_KEY") or os.getenv("CLIENT_PRIVATE_KEY")
     if not private_key:
-        print("ERROR: Set PRIVATE_KEY in .env")
+        print("ERROR: Set PRIVATE_KEY or CLIENT_PRIVATE_KEY in .env")
         print()
         print("Example:")
         print('  echo "PRIVATE_KEY=0x..." >> .env')
@@ -94,8 +109,11 @@ def main() -> None:
         private_key = f"0x{private_key}"
 
     # Connect to Base Sepolia
-    w3 = Web3(Web3.HTTPProvider(BASE_SEPOLIA_RPC))
-    if not w3.is_connected():
+    w3 = create_web3(BASE_SEPOLIA_RPC)
+    # Test connection
+    try:
+        w3.eth.block_number
+    except Exception:
         print(f"ERROR: Cannot connect to {BASE_SEPOLIA_RPC}")
         sys.exit(1)
 
