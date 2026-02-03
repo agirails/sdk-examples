@@ -20,6 +20,7 @@
 
 import 'dotenv/config';
 import { ACTPClient, ProofGenerator } from '@agirails/sdk';
+import { ethers } from 'ethers';
 import { log, logSection, formatState } from '../src/utils/helpers';
 
 async function main() {
@@ -155,8 +156,10 @@ async function main() {
   console.log('   Proof generated:');
   console.log(`     Content Hash: ${proof.contentHash.substring(0, 20)}...`);
 
-  log('✅', 'Transitioning to DELIVERED with proof...');
-  await client.standard.transitionState(txId, 'DELIVERED');
+  log('✅', 'Transitioning to DELIVERED with dispute-window proof...');
+  const disputeWindowSeconds = 3600;
+  const disputeProof = ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [disputeWindowSeconds]);
+  await client.standard.transitionState(txId, 'DELIVERED', disputeProof);
 
   const tx = await client.standard.getTransaction(txId);
   console.log(`   State: ${formatState(tx!.state)}`);
@@ -175,8 +178,7 @@ async function main() {
   console.log('   └─ Attests: "I delivered X for transaction Y"');
   console.log('   └─ Returns: attestationUID');
   console.log('');
-  console.log('3. Provider transitions to DELIVERED');
-  console.log('   └─ Includes attestationUID in state transition');
+  console.log('3. Provider transitions to DELIVERED (with dispute-window proof)');
   console.log('');
   console.log('4. Requester verifies attestation');
   console.log('   └─ Checks: attestation exists, not revoked, correct schema');

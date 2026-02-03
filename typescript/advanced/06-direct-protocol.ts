@@ -77,7 +77,7 @@ async function main() {
   console.log('\nBase Mainnet:');
   console.log('  Chain ID: 8453');
   console.log('  USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913');
-  console.log('  (Kernel/Escrow: Not yet deployed - coming soon)');
+  console.log('  (Kernel/Escrow: Deployed on testnet/mainnet)');
 
   // =====================================================
   // Part 3: ACTPKernel Methods
@@ -96,10 +96,10 @@ async function main() {
   console.log('  kernel.linkEscrow(txId, escrowVault, escrowId)');
   console.log('');
   console.log('  // Escrow release');
-  console.log('  kernel.releaseEscrow(txId, attestationUID?)');
+  console.log('  kernel.releaseEscrow(txId)');
   console.log('');
   console.log('  // Dispute handling');
-  console.log('  kernel.raiseDispute(txId, reason)');
+  console.log('  kernel.transitionState(txId, DISPUTED, proof)');
   console.log('  kernel.resolveDispute(txId, resolution)');
   console.log('');
   console.log('  // Queries');

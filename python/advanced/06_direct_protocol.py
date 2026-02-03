@@ -18,6 +18,7 @@ Run: python advanced/06_direct_protocol.py
 import asyncio
 import sys
 import time
+from eth_abi import encode
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -138,7 +139,8 @@ async def main() -> None:
     print(f"   State: {format_state(tx.state)}")
 
     # IN_PROGRESS -> DELIVERED
-    await runtime.transition_state(tx_id, State.DELIVERED)
+    proof = "0x" + encode(["uint256"], [3600]).hex()
+    await runtime.transition_state(tx_id, State.DELIVERED, proof=proof)
     tx = await runtime.get_transaction(tx_id)
     print(f"   State: {format_state(tx.state)}")
 

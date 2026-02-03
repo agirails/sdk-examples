@@ -23,6 +23,7 @@ from typing import List
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.utils.helpers import clear_mock_state, log, log_section, format_usdc
+from eth_abi import encode
 
 
 async def main() -> None:
@@ -123,8 +124,11 @@ async def main() -> None:
 
     for tx_id in demo_tx_ids:
         tx = await client.standard.get_transaction(tx_id)
+        if tx and tx.state == "COMMITTED":
+            await client.standard.transition_state(tx_id, "IN_PROGRESS")
         if tx and tx.state in ("COMMITTED", "IN_PROGRESS"):
-            await client.standard.transition_state(tx_id, "DELIVERED")
+            proof = "0x" + encode(["uint256"], [3600]).hex()
+            await client.standard.transition_state(tx_id, "DELIVERED", proof=proof)
             delivered_count += 1
 
     print(f"   Transitioned {delivered_count}/{len(demo_tx_ids)} transactions in {time.time() - start:.2f}s")

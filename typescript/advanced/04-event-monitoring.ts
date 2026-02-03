@@ -17,6 +17,7 @@
 
 import 'dotenv/config';
 import { ACTPClient } from '@agirails/sdk';
+import { ethers } from 'ethers';
 import { log, logSection, formatState, sleep } from '../src/utils/helpers';
 
 // Transaction watcher utility
@@ -117,7 +118,8 @@ async function main() {
   await client.standard.transitionState(txId, 'IN_PROGRESS');
 
   await sleep(500);
-  await client.standard.transitionState(txId, 'DELIVERED');
+  const proof = ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [3600]);
+  await client.standard.transitionState(txId, 'DELIVERED', proof);
 
   await sleep(500);
 

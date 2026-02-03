@@ -121,9 +121,10 @@ async function main() {
 
   log('📦', 'Transitioning all to DELIVERED...');
 
-  const deliverPromises = txIds.map((txId) =>
-    client.standard.transitionState(txId, 'DELIVERED')
-  );
+  const deliverPromises = txIds.map((txId) => {
+    const proof = ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [3600]);
+    return client.standard.transitionState(txId, 'DELIVERED', proof);
+  });
 
   await Promise.all(deliverPromises);
   console.log(`   All transactions delivered`);

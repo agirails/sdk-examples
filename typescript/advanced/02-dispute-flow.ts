@@ -17,6 +17,7 @@
 
 import 'dotenv/config';
 import { ACTPClient } from '@agirails/sdk';
+import { ethers } from 'ethers';
 import { log, logSection, formatState } from '../src/utils/helpers';
 
 async function main() {
@@ -58,7 +59,9 @@ async function main() {
   await requesterClient.standard.linkEscrow(txId1);
 
   log('📦', 'Provider delivers work...');
-  await requesterClient.standard.transitionState(txId1, 'DELIVERED');
+  await requesterClient.standard.transitionState(txId1, 'IN_PROGRESS');
+  const proof1 = ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [3600]);
+  await requesterClient.standard.transitionState(txId1, 'DELIVERED', proof1);
 
   let tx1 = await requesterClient.standard.getTransaction(txId1);
   console.log(`   State: ${formatState(tx1!.state)}`);
@@ -98,7 +101,9 @@ async function main() {
   await requesterClient.standard.linkEscrow(txId2);
 
   log('📦', 'Provider delivers (but work is substandard)...');
-  await requesterClient.standard.transitionState(txId2, 'DELIVERED');
+  await requesterClient.standard.transitionState(txId2, 'IN_PROGRESS');
+  const proof2 = ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [3600]);
+  await requesterClient.standard.transitionState(txId2, 'DELIVERED', proof2);
 
   log('⚠️', 'Requester raises dispute...');
   await requesterClient.advanced.transitionState(txId2, 'DISPUTED');
@@ -130,7 +135,9 @@ async function main() {
   await requesterClient.standard.linkEscrow(txId3);
 
   log('📦', 'Provider delivers (partial completion)...');
-  await requesterClient.standard.transitionState(txId3, 'DELIVERED');
+  await requesterClient.standard.transitionState(txId3, 'IN_PROGRESS');
+  const proof3 = ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [3600]);
+  await requesterClient.standard.transitionState(txId3, 'DELIVERED', proof3);
 
   log('⚠️', 'Requester raises dispute...');
   await requesterClient.advanced.transitionState(txId3, 'DISPUTED');
@@ -157,7 +164,7 @@ async function main() {
   console.log('  1. DELIVERED state reached');
   console.log('  2. Dispute window starts (e.g., 2 hours)');
   console.log('  3. During window: requester can dispute');
-  console.log('  4. After window: funds auto-release to provider');
+  console.log('  4. After window: requester releases escrow to provider');
   console.log('');
   console.log('Best practices:');
   console.log('  - Short windows (1-2 hours) for automated services');

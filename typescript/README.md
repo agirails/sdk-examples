@@ -327,6 +327,7 @@ The Advanced API provides full access to the ACTP protocol through `ACTPClient`.
 
 ```typescript
 import { ACTPClient } from '@agirails/sdk';
+import { ethers } from 'ethers';
 
 const client = await ACTPClient.create({
   mode: 'mock', // or 'testnet' for real blockchain
@@ -346,10 +347,12 @@ await client.standard.linkEscrow(txId);
 
 // State transitions
 await client.standard.transitionState(txId, 'IN_PROGRESS');
-await client.standard.transitionState(txId, 'DELIVERED');
+const proof = ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [7200]);
+await client.standard.transitionState(txId, 'DELIVERED', proof);
 
 // Release payment
-await client.standard.releaseEscrow(txId);
+const tx = await client.standard.getTransaction(txId);
+await client.standard.releaseEscrow(tx!.escrowId!);
 ```
 
 ```bash
@@ -576,8 +579,11 @@ const client = await ACTPClient.create({
 // Standard adapter (balanced control)
 const txId = await client.standard.createTransaction({ ... });
 await client.standard.linkEscrow(txId);
-await client.standard.transitionState(txId, 'DELIVERED');
-await client.standard.releaseEscrow(txId);
+await client.standard.transitionState(txId, 'IN_PROGRESS');
+const proof = ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [7200]);
+await client.standard.transitionState(txId, 'DELIVERED', proof);
+const tx = await client.standard.getTransaction(txId);
+await client.standard.releaseEscrow(tx!.escrowId!);
 
 // Advanced adapter (full control)
 const runtime = client.advanced as BlockchainRuntime;
@@ -629,7 +635,7 @@ INITIATED (0) ─── createTransaction()
     ▼
 COMMITTED (2) ◄── linkEscrow() auto-transitions here
     │
-    ├──► IN_PROGRESS (3) ─── optional work signal
+    ├──► IN_PROGRESS (3) ─── required before DELIVERED
     │
     ▼
 DELIVERED (4) ─── provider submits result

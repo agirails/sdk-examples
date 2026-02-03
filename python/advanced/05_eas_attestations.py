@@ -20,6 +20,7 @@ Run: python advanced/05_eas_attestations.py
 """
 
 import asyncio
+from eth_abi import encode
 import sys
 import time
 import hashlib
@@ -168,8 +169,9 @@ async def main() -> None:
     print("   Proof generated:")
     print(f"     Result Hash: {delivery_proof.result_hash[:20]}...")
 
-    log("✅", "Transitioning to DELIVERED with proof...")
-    await client.standard.transition_state(tx_id, "DELIVERED")
+    log("✅", "Transitioning to DELIVERED with dispute-window proof...")
+    proof = "0x" + encode(["uint256"], [3600]).hex()
+    await client.standard.transition_state(tx_id, "DELIVERED", proof=proof)
 
     tx = await client.standard.get_transaction(tx_id)
     print(f"   State: {format_state(tx.state)}")
@@ -188,8 +190,7 @@ async def main() -> None:
     print("   └─ Attests: 'I delivered X for transaction Y'")
     print("   └─ Returns: attestation_uid")
     print()
-    print("3. Provider transitions to DELIVERED")
-    print("   └─ Includes attestation_uid in state transition")
+    print("3. Provider transitions to DELIVERED (with dispute-window proof)")
     print()
     print("4. Requester verifies attestation")
     print("   └─ Checks: attestation exists, not revoked, correct schema")

@@ -24,6 +24,7 @@ from enum import Enum
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.utils.helpers import clear_mock_state, log, log_section, format_state
+from eth_abi import encode
 
 
 class WatcherState(Enum):
@@ -194,7 +195,9 @@ async def main() -> None:
 
     log("📦", "Transitioning to DELIVERED...")
     for tx_id in tx_ids:
-        await client.standard.transition_state(tx_id, "DELIVERED")
+        await client.standard.transition_state(tx_id, "IN_PROGRESS")
+        proof = "0x" + encode(["uint256"], [3600]).hex()
+        await client.standard.transition_state(tx_id, "DELIVERED", proof=proof)
         await asyncio.sleep(0.3)
 
     print()

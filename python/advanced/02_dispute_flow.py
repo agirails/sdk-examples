@@ -23,6 +23,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.utils.helpers import clear_mock_state, log, log_section, format_state
+from eth_abi import encode
 
 
 async def main() -> None:
@@ -68,7 +69,9 @@ async def main() -> None:
     await requester_client.standard.link_escrow(tx_id1)
 
     log("📦", "Provider delivers work...")
-    await requester_client.standard.transition_state(tx_id1, "DELIVERED")
+    await requester_client.standard.transition_state(tx_id1, "IN_PROGRESS")
+    proof1 = "0x" + encode(["uint256"], [3600]).hex()
+    await requester_client.standard.transition_state(tx_id1, "DELIVERED", proof=proof1)
 
     tx1 = await requester_client.standard.get_transaction(tx_id1)
     print(f"   State: {format_state(tx1.state)}")
@@ -103,7 +106,9 @@ async def main() -> None:
     await requester_client.standard.link_escrow(tx_id2)
 
     log("📦", "Provider delivers (but work is substandard)...")
-    await requester_client.standard.transition_state(tx_id2, "DELIVERED")
+    await requester_client.standard.transition_state(tx_id2, "IN_PROGRESS")
+    proof2 = "0x" + encode(["uint256"], [3600]).hex()
+    await requester_client.standard.transition_state(tx_id2, "DELIVERED", proof=proof2)
 
     log("⚠️", "Requester raises dispute...")
     await requester_client.advanced.transition_state(tx_id2, "DISPUTED")
@@ -135,7 +140,9 @@ async def main() -> None:
     await requester_client.standard.link_escrow(tx_id3)
 
     log("📦", "Provider delivers (partial completion)...")
-    await requester_client.standard.transition_state(tx_id3, "DELIVERED")
+    await requester_client.standard.transition_state(tx_id3, "IN_PROGRESS")
+    proof3 = "0x" + encode(["uint256"], [3600]).hex()
+    await requester_client.standard.transition_state(tx_id3, "DELIVERED", proof=proof3)
 
     log("⚠️", "Requester raises dispute...")
     await requester_client.advanced.transition_state(tx_id3, "DISPUTED")
@@ -162,7 +169,7 @@ async def main() -> None:
     print("  1. DELIVERED state reached")
     print("  2. Dispute window starts (e.g., 2 hours)")
     print("  3. During window: requester can dispute")
-    print("  4. After window: funds auto-release to provider")
+    print("  4. After window: requester releases escrow to provider")
     print()
     print("Best practices:")
     print("  - Short windows (1-2 hours) for automated services")
