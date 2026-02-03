@@ -10,10 +10,7 @@
  * 3. Get testnet ETH from https://www.coinbase.com/faucets/base-sepolia-faucet
  * 4. Mint MockUSDC: npx ts-node testnet/mint-usdc.ts
  *
- * Contract Addresses (Base Sepolia):
- * - ACTPKernel:  0xD199070F8e9FB9a127F6Fe730Bc13300B4b3d962
- * - EscrowVault: 0x948b9Ea081C4Cec1E112Af2e539224c531d4d585
- * - MockUSDC:    0x444b4e1A65949AB2ac75979D5d0166Eb7A248Ccb
+ * Contract addresses are loaded from SDK's getNetwork('base-sepolia').
  *
  * Run: npx ts-node testnet/01-real-transaction.ts
  */
@@ -142,17 +139,56 @@ async function main() {
     console.log('The transaction was created but escrow not linked.');
   }
 
-  // Final state
+  // Step 6: Transition to IN_PROGRESS
   console.log('');
-  console.log('[6/6] Final transaction state...');
+  console.log('[6/9] Transitioning to IN_PROGRESS...');
+  try {
+    await client.standard.transitionState(txId, 'IN_PROGRESS');
+    console.log('      State: IN_PROGRESS');
+  } catch (error: any) {
+    console.log('      Transition failed:', error.message);
+    console.log('      (This is expected if escrow was not linked)');
+  }
+
+  // Step 7: Transition to DELIVERED (requires proof on-chain)
+  console.log('');
+  console.log('[7/9] Transitioning to DELIVERED...');
+  console.log('      NOTE: On-chain DELIVERED requires dispute window proof');
+  try {
+    // IMPORTANT: For testnet/mainnet, DELIVERED requires a proof parameter
+    // The proof encodes the dispute window: abi.encode(['uint256'], [disputeWindowSeconds])
+    const disputeWindowSeconds = 3600; // Must match what was set in createTransaction
+    const proof = ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [disputeWindowSeconds]);
+
+    await client.standard.transitionState(txId, 'DELIVERED', proof);
+    console.log('      State: DELIVERED');
+    console.log(`      Dispute window: ${disputeWindowSeconds}s (${disputeWindowSeconds / 60} min)`);
+  } catch (error: any) {
+    console.log('      Transition failed:', error.message);
+  }
+
+  // Step 8: Dispute window info
+  console.log('');
+  console.log('[8/9] Dispute window active...');
+  console.log('      In production, wait for dispute window to expire before settling.');
+  console.log('      For demo purposes, we skip ahead.');
+
+  // Step 9: Final state
+  console.log('');
+  console.log('[9/9] Final transaction state...');
   const finalTx = await client.standard.getTransaction(txId);
   console.log('      State:', finalTx?.state || 'Unknown');
   console.log('      Escrow ID:', finalTx?.escrowId || 'Not linked');
 
+  console.log('');
+  console.log('  NEXT STEPS (after dispute window expires):');
+  console.log('  - Call client.standard.releaseEscrow(escrowId) to settle');
+  console.log('  - Funds will be released to provider');
+
   // Summary
   console.log('');
   console.log('='.repeat(60));
-  console.log('Transaction created on Base Sepolia!');
+  console.log('Transaction lifecycle demo on Base Sepolia!');
   console.log('='.repeat(60));
   console.log('');
   console.log('View on BaseScan:');

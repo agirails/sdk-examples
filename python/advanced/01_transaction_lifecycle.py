@@ -62,7 +62,6 @@ async def main() -> None:
         "to": "0x2222222222222222222222222222222222222222",
         "amount": 10,  # $10 USDC
         "deadline": "+2h",  # 2 hours from now
-        "description": "Basic API demo transaction",
     })
 
     print(f"   Transaction ID: {basic_result.tx_id[:16]}...")
@@ -104,6 +103,11 @@ async def main() -> None:
     print(f"   State: {format_state(tx.state)}")
 
     log("📦", "Step 4: Transition to DELIVERED")
+    # NOTE: In mock mode, no proof is required.
+    # For testnet/mainnet, you must pass a proof parameter:
+    #   from eth_abi import encode
+    #   proof = "0x" + encode(["uint256"], [dispute_window_seconds]).hex()
+    #   await client.standard.transition_state(tx_id, "DELIVERED", proof=proof)
     await client.standard.transition_state(tx_id, "DELIVERED")
 
     tx = await client.standard.get_transaction(tx_id)

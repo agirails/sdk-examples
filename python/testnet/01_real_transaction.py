@@ -11,10 +11,8 @@ Prerequisites:
     3. Get testnet ETH from https://www.coinbase.com/faucets/base-sepolia-faucet
     4. Mint MockUSDC: python testnet/mint_usdc.py
 
-Contract Addresses (Base Sepolia):
-    - ACTPKernel:  0xD199070F8e9FB9a127F6Fe730Bc13300B4b3d962
-    - EscrowVault: 0x948b9Ea081C4Cec1E112Af2e539224c531d4d585
-    - MockUSDC:    0x444b4e1A65949AB2ac75979D5d0166Eb7A248Ccb
+Contract addresses are loaded from SDK's network config.
+Use `from agirails import get_network` to access them programmatically.
 
 Run: python testnet/01_real_transaction.py
 """
@@ -57,12 +55,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from src.utils.helpers import log, log_section
 
 
-# Contract addresses (Base Sepolia)
-CONTRACTS = {
-    "actp_kernel": "0xD199070F8e9FB9a127F6Fe730Bc13300B4b3d962",
-    "escrow_vault": "0x948b9Ea081C4Cec1E112Af2e539224c531d4d585",
-    "mock_usdc": "0x444b4e1A65949AB2ac75979D5d0166Eb7A248Ccb",
-}
+# Contract addresses loaded from SDK (Base Sepolia)
+# Use get_network('base-sepolia').contracts for programmatic access
+CONTRACTS = None  # Will be loaded from SDK
 
 # Network config
 BASE_SEPOLIA_RPC = os.getenv("RPC_URL", "https://sepolia.base.org")
@@ -154,7 +149,16 @@ async def main() -> None:
     log("1/6", "Creating ACTPClient in testnet mode...")
 
     try:
-        from agirails import ACTPClient
+        from agirails import ACTPClient, get_network
+
+        # Load contract addresses from SDK
+        global CONTRACTS
+        network = get_network("base-sepolia")
+        CONTRACTS = {
+            "actp_kernel": network.contracts.actp_kernel,
+            "escrow_vault": network.contracts.escrow_vault,
+            "mock_usdc": network.contracts.usdc,
+        }
 
         client = await ACTPClient.create(
             mode="testnet",
@@ -166,6 +170,12 @@ async def main() -> None:
         print("      Connected to blockchain")
     except ImportError:
         print("      AGIRAILS SDK not installed, using web3 directly")
+        # Fallback to hardcoded addresses
+        CONTRACTS = {
+            "actp_kernel": "0xD199070F8e9FB9a127F6Fe730Bc13300B4b3d962",
+            "escrow_vault": "0x948b9Ea081C4Cec1E112Af2e539224c531d4d585",
+            "mock_usdc": "0x444b4e1A65949AB2ac75979D5d0166Eb7A248Ccb",
+        }
         client = None
     print()
 
@@ -295,9 +305,52 @@ async def main() -> None:
     print()
 
     # =====================================================
-    # Step 6: Final State
+    # Step 6: Complete Lifecycle (IN_PROGRESS → DELIVERED → SETTLED)
     # =====================================================
-    log("6/6", "Final transaction state...")
+    log("6/9", "Transitioning to IN_PROGRESS...")
+
+    if client:
+        try:
+            await client.standard.transition_state(tx_id, "IN_PROGRESS")
+            print("      State: IN_PROGRESS")
+        except Exception as e:
+            print(f"      Transition failed: {e}")
+            print("      (This is expected if escrow was not linked)")
+    print()
+
+    # =====================================================
+    # Step 7: Transition to DELIVERED (requires proof on-chain)
+    # =====================================================
+    log("7/9", "Transitioning to DELIVERED...")
+    print("      NOTE: On-chain DELIVERED requires dispute window proof")
+
+    if client:
+        try:
+            # IMPORTANT: For testnet/mainnet, DELIVERED requires a proof parameter
+            # The proof encodes the dispute window: abi.encode(['uint256'], [disputeWindowSeconds])
+            from eth_abi import encode
+            dispute_window_seconds = 3600  # Must match what was set in create_transaction
+            proof = "0x" + encode(["uint256"], [dispute_window_seconds]).hex()
+
+            await client.standard.transition_state(tx_id, "DELIVERED", proof=proof)
+            print("      State: DELIVERED")
+            print(f"      Dispute window: {dispute_window_seconds}s ({dispute_window_seconds // 60} min)")
+        except Exception as e:
+            print(f"      Transition failed: {e}")
+    print()
+
+    # =====================================================
+    # Step 8: Wait for Dispute Window
+    # =====================================================
+    log("8/9", "Dispute window active...")
+    print("      In production, wait for dispute window to expire before settling.")
+    print("      For demo purposes, we'll skip ahead.")
+    print()
+
+    # =====================================================
+    # Step 9: Final State
+    # =====================================================
+    log("9/9", "Final transaction state...")
 
     if client:
         final_tx = await client.standard.get_transaction(tx_id)
@@ -313,8 +366,13 @@ async def main() -> None:
         print("      State: INITIATED (simulated)")
         print("      Escrow ID: Not linked")
 
+    print()
+    print("  NEXT STEPS (after dispute window expires):")
+    print("  - Call client.standard.release_escrow(escrow_id) to settle")
+    print("  - Funds will be released to provider")
+
     # Summary
-    log_section("Transaction created on Base Sepolia!")
+    log_section("Transaction lifecycle demo on Base Sepolia!")
     print()
     print("View on BaseScan:")
     print(f"https://sepolia.basescan.org/address/{CONTRACTS['actp_kernel']}")

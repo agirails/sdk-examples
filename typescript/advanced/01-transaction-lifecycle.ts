@@ -93,6 +93,10 @@ async function main() {
   console.log(`   State: ${formatState(tx!.state)}`);
 
   log('📦', 'Step 4: Transition to DELIVERED');
+  // NOTE: In mock mode, no proof is required.
+  // For testnet/mainnet, you must pass a proof parameter:
+  //   const proof = ethers.AbiCoder.defaultAbiCoder().encode(['uint256'], [disputeWindowSeconds]);
+  //   await client.standard.transitionState(txId, 'DELIVERED', proof);
   await client.standard.transitionState(txId, 'DELIVERED');
 
   tx = await client.standard.getTransaction(txId);
