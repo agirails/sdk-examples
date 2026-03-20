@@ -73,11 +73,16 @@ async function main() {
   console.log(`    USDC: ${baseSepolia.contracts.usdc}`);
   console.log(`    EAS: ${baseSepolia.contracts.eas}`);
 
-  // Base Mainnet - contracts not yet deployed
+  const baseMainnet = getNetwork('base-mainnet');
   console.log('\nBase Mainnet:');
-  console.log('  Chain ID: 8453');
-  console.log('  USDC: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913');
-  console.log('  (Kernel/Escrow: Deployed on testnet/mainnet)');
+  console.log(`  Chain ID: ${baseMainnet.chainId}`);
+  console.log(`  RPC URL: ${baseMainnet.rpcUrl}`);
+  console.log(`  Block Explorer: ${baseMainnet.blockExplorer}`);
+  console.log('  Contracts:');
+  console.log(`    ACTPKernel: ${baseMainnet.contracts.actpKernel}`);
+  console.log(`    EscrowVault: ${baseMainnet.contracts.escrowVault}`);
+  console.log(`    USDC: ${baseMainnet.contracts.usdc}`);
+  console.log(`    EAS: ${baseMainnet.contracts.eas}`);
 
   // =====================================================
   // Part 3: ACTPKernel Methods
@@ -196,7 +201,8 @@ async function main() {
   console.log('  amount: ethers.parseUnits("100", 6), // 100 USDC');
   console.log('  deadline: Math.floor(Date.now() / 1000) + 3600,');
   console.log('  disputeWindow: 7200,');
-  console.log('  serviceHash: ethers.keccak256(ethers.toUtf8Bytes("my-service")),');
+  console.log('  metadata: ethers.keccak256(ethers.toUtf8Bytes("my-service")),');
+  console.log("  agentId: '0',");
   console.log('});');
   console.log('');
   console.log('// Approve USDC for escrow');

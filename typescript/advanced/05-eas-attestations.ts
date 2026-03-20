@@ -66,20 +66,20 @@ async function main() {
 
   console.log('EIP-712 Typed Data Structure:');
   console.log('```typescript');
-  console.log('// DeliveryProofBuilder is used internally by BlockchainRuntime');
-  console.log('// to create EIP-712 typed data for signing');
+  console.log('// Canonical delivery schema (AIP-6)');
   console.log('const typedData = {');
   console.log('  domain: {');
   console.log("    name: 'ACTP Protocol',");
   console.log('    version: 1,');
   console.log('    chainId: 84532, // Base Sepolia');
   console.log('  },');
-  console.log("  primaryType: 'DeliveryProof',");
+  console.log("  primaryType: 'DeliveryAttestation',");
   console.log('  types: {');
-  console.log('    DeliveryProof: [');
+  console.log('    DeliveryAttestation: [');
   console.log("      { name: 'txId', type: 'bytes32' },");
-  console.log("      { name: 'contentHash', type: 'bytes32' },");
-  console.log("      { name: 'timestamp', type: 'uint256' },");
+  console.log("      { name: 'resultCID', type: 'string' },");
+  console.log("      { name: 'resultHash', type: 'bytes32' },");
+  console.log("      { name: 'deliveredAt', type: 'uint256' },");
   console.log('    ]');
   console.log('  }');
   console.log('};');
@@ -101,7 +101,7 @@ async function main() {
   console.log('  privateKey: wallet.privateKey,');
   console.log('  easConfig: {');
   console.log("    contractAddress: '0x4200000000000000000000000000000000000021',");
-  console.log("    schemaUID: '0x1b0ebdf0...',");
+  console.log("    deliveryProofSchemaId: getNetwork('base-sepolia').eas.deliverySchemaUID,");
   console.log('  },');
   console.log('  requireAttestation: true, // Enforce attestation before release');
   console.log('});');

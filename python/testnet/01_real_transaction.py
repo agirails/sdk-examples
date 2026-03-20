@@ -172,8 +172,8 @@ async def main() -> None:
         print("      AGIRAILS SDK not installed, using web3 directly")
         # Fallback to hardcoded addresses
         CONTRACTS = {
-            "actp_kernel": "0xD199070F8e9FB9a127F6Fe730Bc13300B4b3d962",
-            "escrow_vault": "0x948b9Ea081C4Cec1E112Af2e539224c531d4d585",
+            "actp_kernel": "0x469CBADbACFFE096270594F0a31f0EEC53753411",
+            "escrow_vault": "0x57f888261b629bB380dfb983f5DA6c70Ff2D49E5",
             "mock_usdc": "0x444b4e1A65949AB2ac75979D5d0166Eb7A248Ccb",
         }
         client = None

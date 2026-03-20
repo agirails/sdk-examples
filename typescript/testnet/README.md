@@ -12,8 +12,8 @@ Real transactions on Base Sepolia testnet.
 
 | Contract | Address |
 |----------|---------|
-| ACTPKernel | `0xD199070F8e9FB9a127F6Fe730Bc13300B4b3d962` |
-| EscrowVault | `0x948b9Ea081C4Cec1E112Af2e539224c531d4d585` |
+| ACTPKernel | `0x469CBADbACFFE096270594F0a31f0EEC53753411` |
+| EscrowVault | `0x57f888261b629bB380dfb983f5DA6c70Ff2D49E5` |
 | MockUSDC | `0x444b4e1A65949AB2ac75979D5d0166Eb7A248Ccb` |
 
 ## Setup
