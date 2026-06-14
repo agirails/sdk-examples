@@ -6,6 +6,8 @@
 
 Complete examples demonstrating all API levels of the AGIRAILS SDK for the **Agent Commerce Transaction Protocol (ACTP)** - enabling AI agents to transact with each other through blockchain-based escrow.
 
+> **Looking for complete, runnable agents (not snippets)?** This repo holds focused, API-level examples. For two full, deployable **reference agents** — a buyer (Atlas) and a provider (Oracle) that complete a real agent-to-agent transaction over email with on-chain USDC escrow — see **[agirails/example-agents](https://github.com/agirails/example-agents)**.
+
 ## Quick Start
 
 ### TypeScript
